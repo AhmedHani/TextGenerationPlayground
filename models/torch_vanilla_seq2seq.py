@@ -142,6 +142,21 @@ class VanillaSeq2Seq(nn.Module):
 
         return loss.item()
 
+    def evaluate_batch(self, batch_x, batch_y):
+        batch_x = Variable(torch.from_numpy(np.asarray(batch_x)).long().t())
+        batch_y = Variable(torch.from_numpy(np.asarray(batch_y)).long().t())
+
+        self.eval()
+
+        with torch.no_grad():
+            output = self.forward(batch_x, batch_y)
+            output = output[1:].view(-1, output.shape[-1])
+            batch_y = batch_y[1:].contiguous().view(-1)
+
+            loss = self.criterion(output, batch_y)
+
+        return loss.item()
+
     def forward(self, src, trg, teacher_forcing_ratio=0.5):
         # src = [src sent len, batch size]
         # trg = [trg sent len, batch size]

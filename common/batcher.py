@@ -140,12 +140,24 @@ class Batcher(object):
         return self.train_end_idx - self.train_start_idx
 
     @property
+    def total_train_batches(self):
+        return int(int(0.8 * self.size) / self.batch_size)
+
+    @property
     def total_valid_samples(self):
         return self.valid_end_idx - self.valid_start_idx
 
     @property
+    def total_valid_batches(self):
+        return int(int(0.1 * self.size) / self.batch_size)
+
+    @property
     def total_test_samples(self):
         return self.test_end_idx - self.test_start_idx
+
+    @property
+    def total_test_batches(self):
+        return int(int(0.1 * self.size) / self.batch_size)
     
     @property
     def train_data(self):
