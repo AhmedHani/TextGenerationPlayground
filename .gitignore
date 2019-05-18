@@ -1,0 +1,17 @@
+.idea
+*.pyc
+*.pkl
+*.pt
+.vscode
+**/**/**/experiments/*/*/
+**/**/**/production/*/
+**/**/datasets/*/*.txt
+**/**/datasets/*/*.csv
+**/**/datasets/*/*.zip
+__pycache__
+.DS_Store
+.floydexpt
+.floydignore
+floyd.yml
+.floyddata
+glove.6B.300d.txt
