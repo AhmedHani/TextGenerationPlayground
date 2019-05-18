@@ -128,7 +128,9 @@ with open('./output.txt', 'w') as writer:
 
         output = model.test_batch(batchX, batchY)
 
-        writer.write(str(batchY))
-        writer.write("\n\n")
-        writer.write(str(output))
-        writer.write("\n\n")
+        for i in range(0, len(batchY)):
+            writer.write(str(batchY[i]))
+            writer.write("\n")
+            writer.write(str(output[i]))
+            writer.write("\n\n")
+
