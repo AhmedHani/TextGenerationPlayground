@@ -88,7 +88,7 @@ plt.title("Learning Curve using cross entropy cost function")
 plt.xlabel("Number of Epochs")
 plt.ylabel("Cost")
 plt.plot(range(0, len(learning_rate)), learning_rate)
-plt.show()
+plt.savefig('./learning_rate.png')
 
 average_valid_error = 0.0
 batch_count = 0

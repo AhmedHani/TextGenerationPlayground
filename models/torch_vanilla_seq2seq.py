@@ -240,7 +240,7 @@ class VanillaSeq2Seq(nn.Module):
             sentence = []
 
             for word in batch:
-                sentence.append(np.max(word))
+                sentence.append(np.argmax(word))
 
             s.append(sentence)
 
