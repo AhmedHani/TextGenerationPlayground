@@ -1,3 +1,4 @@
+import math
 import argparse
 import matplotlib.pyplot as plt
 from common.batcher import Batcher
@@ -12,9 +13,9 @@ parser = argparse.ArgumentParser(description='Encoder-Decoder Text Generation')
 parser.add_argument('--batch_size', type=int, default=32, help='training batch size')
 parser.add_argument('--epochs', type=int, default=2, help='number of training epochs')
 parser.add_argument('--embedding_dim', type=int, default=128, help='embedding dimension')
-parser.add_argument('--hidden_dim', type=int, default=256, help='hidden layer dimension')
-parser.add_argument('--n_layers', type=int, default=1, help='number of stacked rnn layers')
-parser.add_argument('--no-cuda', action='store_true', default=True, help='disables CUDA training')
+parser.add_argument('--hidden_dim', type=int, default=512, help='hidden layer dimension')
+parser.add_argument('--n_layers', type=int, default=2, help='number of stacked rnn layers')
+parser.add_argument('--no-cuda', action='store_true', default=False, help='disables CUDA training')
 
 args = parser.parse_args()
 
@@ -43,13 +44,15 @@ encoder = Encoder(input_dim=text_encoder.encoding_size(),
                   emb_dim=embedding_dim,
                   hid_dim=hidden_dim,
                   n_layers=n_layers,
-                  dropout=0.5)
+                  dropout=0.5,
+                  device=device)
 
 decoder = Decoder(output_dim=text_encoder.encoding_size(),
                   emb_dim=embedding_dim,
                   hid_dim=hidden_dim,
                   n_layers=n_layers,
-                  dropout=0.5)
+                  dropout=0.5,
+                  device=device)
 
 model = VanillaSeq2Seq(encoder, decoder, device)
 
@@ -74,8 +77,8 @@ for epoch in range(1, epochs + 1):
         error = model.train_batch(batchX, batchY)
         epoch_average_error += error
 
-        print("Epoch {}/{} \t Batch {}/{} \t TrainLoss {}".format(
-            epoch, epochs, batch_count, batcher.total_train_batches, error))
+        print("Epoch {}/{} \t Batch {}/{} \t TrainLoss {} \t Perplexity {} ".format(
+            epoch, epochs, batch_count, batcher.total_train_batches, error, round(math.exp(error), 3)))
 
     epoch_average_error /= batcher.total_train_batches
 
@@ -107,5 +110,3 @@ while batcher.hasnext('valid'):
     average_valid_error += error
 
 print("average valid loss: {}".format(average_valid_error / float(batcher.total_valid_batches)))
-
-

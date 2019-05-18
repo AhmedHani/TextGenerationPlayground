@@ -7,7 +7,7 @@ import random
 
 
 class Encoder(nn.Module):
-    def __init__(self, input_dim, emb_dim, hid_dim, n_layers, dropout):
+    def __init__(self, input_dim, emb_dim, hid_dim, n_layers, dropout, device='cpu'):
         super().__init__()
 
         self.input_dim = input_dim
@@ -21,6 +21,10 @@ class Encoder(nn.Module):
         self.rnn = nn.LSTM(emb_dim, hid_dim, n_layers, dropout=dropout)
 
         self.dropout = nn.Dropout(dropout)
+
+        torch.device(device)
+
+        self.to(device)
 
     def forward(self, src):
         # src = [src sent len, batch size]
@@ -41,7 +45,7 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, output_dim, emb_dim, hid_dim, n_layers, dropout):
+    def __init__(self, output_dim, emb_dim, hid_dim, n_layers, dropout, device='cpu'):
         super().__init__()
 
         self.emb_dim = emb_dim
@@ -57,6 +61,10 @@ class Decoder(nn.Module):
         self.out = nn.Linear(hid_dim, output_dim)
 
         self.dropout = nn.Dropout(dropout)
+
+        torch.device(device)
+
+        self.to(device)
 
     def forward(self, input, hidden, cell):
         # input = [batch size]
@@ -111,11 +119,12 @@ class VanillaSeq2Seq(nn.Module):
         self.optimizer = optim.Adam(self.parameters())
         self.criterion = nn.CrossEntropyLoss()
 
-        self.to('cpu')
+        self.to(device)
+        torch.device(device)
 
     def train_batch(self, batch_x, batch_y):
-        batch_x = Variable(torch.from_numpy(np.asarray(batch_x)).long().t())
-        batch_y = Variable(torch.from_numpy(np.asarray(batch_y)).long().t())
+        batch_x = Variable(torch.from_numpy(np.asarray(batch_x)).long().t().to(self.device))
+        batch_y = Variable(torch.from_numpy(np.asarray(batch_y)).long().t().to(self.device))
 
         self.train()
 
