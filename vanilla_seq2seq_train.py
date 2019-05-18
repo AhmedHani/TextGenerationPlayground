@@ -90,7 +90,6 @@ plt.ylabel("Cost")
 plt.plot(range(0, len(learning_rate)), learning_rate)
 plt.show()
 
-
 average_valid_error = 0.0
 batch_count = 0
 
@@ -110,3 +109,26 @@ while batcher.hasnext('valid'):
     average_valid_error += error
 
 print("average valid loss: {}".format(average_valid_error / float(batcher.total_valid_batches)))
+
+batch_count = 0
+
+
+with open('./output.txt', 'w') as writer:
+    while batcher.hasnext('test'):
+        batch_count += 1
+        batch = batcher.nextbatch('test')
+        batchX, batchY = [item[0] for item in batch], [item[1] for item in batch]
+
+        for transformation in transformations:
+            batchX = transformation(batchX)
+            batchY = transformation(batchY)
+
+        batchX = text_encoder.encode(batchX)
+        batchY = text_encoder.encode(batchY)
+
+        output = model.test_batch(batchX, batchY)
+
+        writer.write(str(batchY))
+        writer.write("\n\n")
+        writer.write(str(output))
+        writer.write("\n\n")

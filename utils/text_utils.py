@@ -248,8 +248,8 @@ class TextAnalyzer:
             self.out.write('chars frequencies: \n{}\n\n'.format(freqs_format))
 
         if words2index:
-            results['words2index'] = {word: i for i, word in enumerate(words.keys(), start=1)}
-            results['index2words'] = {i: word for i, word in enumerate(words.keys(), start=1)}
+            results['words2index'] = {word: i for i, word in enumerate(words.keys(), start=4)}
+            results['index2words'] = {i: word for i, word in enumerate(words.keys(), start=4)}
 
         from types import SimpleNamespace
 
@@ -799,18 +799,18 @@ class _WordIndexLoader(object):
 
     def __getitem__(self, item):
         if item == '<sos>':
-            return self.max_index + 1
+            return 0
 
         if item == '<eos>':
-            return self.max_index + 2
+            return 1
 
         if item == '<pad>':
-            return self.max_index + 3
+            return 2
 
         if item in self.word2indexes:
             return self.word2indexes[item]
         else:
-            return 0
+            return 3
 
     def encoding_size(self):
         return max(self.word2indexes.values()) + 4

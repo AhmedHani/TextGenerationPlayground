@@ -152,8 +152,8 @@ class VanillaSeq2Seq(nn.Module):
         return loss.item()
 
     def evaluate_batch(self, batch_x, batch_y):
-        batch_x = Variable(torch.from_numpy(np.asarray(batch_x)).long().t())
-        batch_y = Variable(torch.from_numpy(np.asarray(batch_y)).long().t())
+        batch_x = Variable(torch.from_numpy(np.asarray(batch_x)).long().t().to(self.device))
+        batch_y = Variable(torch.from_numpy(np.asarray(batch_y)).long().t().to(self.device))
 
         self.eval()
 
@@ -165,6 +165,17 @@ class VanillaSeq2Seq(nn.Module):
             loss = self.criterion(output, batch_y)
 
         return loss.item()
+
+    def test_batch(self, batch_x, batch_y):
+        batch_x = Variable(torch.from_numpy(np.asarray(batch_x)).long().t().to(self.device))
+        batch_y = Variable(torch.from_numpy(np.asarray(batch_y)).long().t().to(self.device))
+
+        self.eval()
+
+        with torch.no_grad():
+            output = self.forward_test(batch_x, batch_y)
+
+        return output
 
     def forward(self, src, trg, teacher_forcing_ratio=0.5):
         # src = [src sent len, batch size]
@@ -194,6 +205,46 @@ class VanillaSeq2Seq(nn.Module):
             input = (trg[t] if teacher_force else top1)
 
         return outputs
+
+    def forward_test(self, src, trg):
+        # src = [src sent len, batch size]
+        # trg = [trg sent len, batch size]
+
+        # teacher_forcing_ratio is probability to use teacher forcing
+        # e.g. if teacher_forcing_ratio is 0.75 we use ground-truth inputs 75% of the time
+
+        batch_size = trg.shape[1]
+        max_len = trg.shape[0]
+        trg_vocab_size = self.decoder.output_dim
+
+        # tensor to store decoder outputs
+        outputs = torch.zeros(max_len, batch_size, trg_vocab_size).to(self.device)
+
+        # last hidden state of the encoder is used as the initial hidden state of the decoder
+        hidden, cell = self.encoder(src)
+
+        # first input to the decoder is the <sos> tokens
+        input = trg[0, :]
+
+        for t in range(1, max_len):
+            output, hidden, cell = self.decoder(input, hidden, cell)
+            outputs[t] = output
+            top1 = output.max(1)[1]
+            input = top1
+
+        result = outputs.view(batch_size, max_len, trg_vocab_size).cpu().data.numpy()
+
+        s = []
+
+        for batch in result:
+            sentence = []
+
+            for word in batch:
+                sentence.append(np.max(word))
+
+            s.append(sentence)
+
+        return s
 
     def count_parameters(self, ):
         p = sum(p.numel() for p in self.parameters() if p.requires_grad)
