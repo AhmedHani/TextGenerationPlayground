@@ -170,13 +170,13 @@ class VanillaSeq2Seq(nn.Module):
 
         # first input to the decoder is the <sos> tokens
         input = trg[0, :]
-        r = [trg[0, :].data.numpy()]
+        r = [trg[0, :].cpu().data.numpy()]
 
         for t in range(1, max_len):
             output, hidden, cell = self.decoder(input, hidden, cell)
             outputs[t] = output
             top1 = output.max(1)[1]
-            r.append(top1.data.numpy())
+            r.append(top1.cpu().data.numpy())
             input = top1
 
         return np.transpose(np.asarray(r)).tolist()
