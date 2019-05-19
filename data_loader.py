@@ -41,8 +41,20 @@ class PaperDataset(object):
                 chars_freqs=False)
 
 
-class GYFACEntertainmentFormal(object):
-    pass
+class GYAFCEntertainmentFormal(object):
+    def __init__(self, data_path='./data/GYAFC_Corpus/Entertainment_Music/train/formal'):
+        self.formal_df = pd.read_fwf(data_path)
+        self.formal_df.columns = ['Formal-X']
+        self.formal_df['Formal-X'] = self.formal_df['Formal-X'].apply(lambda x: str(x))
+        self.formal_df['Formal-Y'] = self.formal_df['Formal-X']
+
+    def data_list(self):
+        return list(zip(self.formal_df['Formal-X'], self.formal_df['Formal-Y']))
+
+    def info(self):
+        return TextAnalyzer(data=self.formal_df['Formal-X'].tolist()).all(
+                words_freqs=False,
+                chars_freqs=False)
 
 
 class GYFACEntertainmentInformal(object):

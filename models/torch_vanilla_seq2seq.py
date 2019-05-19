@@ -114,7 +114,7 @@ class VanillaSeq2Seq(nn.Module):
         assert encoder.n_layers == decoder.n_layers, \
             "Encoder and decoder must have equal number of layers!"
 
-        self.init_weights()
+        #self.init_weights()
 
         self.optimizer = optim.Adam(self.parameters())
         self.criterion = nn.CrossEntropyLoss()
@@ -200,6 +200,7 @@ class VanillaSeq2Seq(nn.Module):
         for t in range(1, max_len):
             output, hidden, cell = self.decoder(input, hidden, cell)
             outputs[t] = output
+
             teacher_force = random.random() < teacher_forcing_ratio
             top1 = output.max(1)[1]
             input = (trg[t] if teacher_force else top1)
@@ -225,26 +226,16 @@ class VanillaSeq2Seq(nn.Module):
 
         # first input to the decoder is the <sos> tokens
         input = trg[0, :]
+        r = [trg[0, :].data.numpy()]
 
         for t in range(1, max_len):
             output, hidden, cell = self.decoder(input, hidden, cell)
             outputs[t] = output
             top1 = output.max(1)[1]
+            r.append(top1.data.numpy())
             input = top1
 
-        result = outputs.view(batch_size, max_len, trg_vocab_size).cpu().data.numpy()
-
-        s = []
-
-        for batch in result:
-            sentence = []
-
-            for word in batch:
-                sentence.append(np.argmax(word))
-
-            s.append(sentence)
-
-        return s
+        return np.transpose(np.asarray(r)).tolist()
 
     def count_parameters(self, ):
         p = sum(p.numel() for p in self.parameters() if p.requires_grad)
