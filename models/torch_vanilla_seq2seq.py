@@ -189,3 +189,6 @@ class VanillaSeq2Seq(nn.Module):
     def init_weights(self):
         for name, param in self.named_parameters():
             nn.init.uniform_(param.data, -0.08, 0.08)
+
+    def save(self, path):
+        torch.save(self.state_dict(), path)

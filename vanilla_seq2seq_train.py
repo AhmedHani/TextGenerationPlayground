@@ -82,11 +82,30 @@ for epoch in range(1, epochs + 1):
 
     learning_rate.append(average_epoch_error / batcher.total_train_batches)
 
+    average_valid_error = 0.0
+    while batcher.hasnext('valid'):
+        batch = batcher.nextbatch('valid')
+        batchX, batchY = [item[0] for item in batch], [item[1] for item in batch]
+
+        for transformation in transformations:
+            batchX = transformation(batchX)
+            batchY = transformation(batchY)
+
+        batchX = text_encoder.encode(batchX)
+        batchY = text_encoder.encode(batchY)
+
+        error = model.evaluate_batch(batchX, batchY)
+        average_valid_error += error
+
+    print("average valid loss: {}".format(average_valid_error / float(batcher.total_valid_batches)))
+
 plt.title("Learning Curve using cross entropy cost function")
 plt.xlabel("Number of Epochs")
 plt.ylabel("Cost")
 plt.plot(range(0, len(learning_rate)), learning_rate)
 plt.savefig('./learning_rate.png')
+
+model.save('./vanilla_seq2seq.pt')
 
 average_valid_error = 0.0
 batch_count = 0
@@ -115,6 +134,7 @@ with open('./output.txt', 'w') as writer:
         batch_count += 1
         batch = batcher.nextbatch('test')
         batchX, batchY = [item[0] for item in batch], [item[1] for item in batch]
+        originalX, originalY = [item[0] for item in batch], [item[1] for item in batch]
 
         for transformation in transformations:
             batchX = transformation(batchX)
@@ -126,7 +146,5 @@ with open('./output.txt', 'w') as writer:
         output = model.test_batch(batchX, batchY)
 
         for i in range(0, len(batchY)):
-            writer.write(str(batchY[i]))
-            writer.write("\n")
-            writer.write(str(output[i]))
-            writer.write("\n\n")
+            writer.write("Source: {}\n".format(originalY))
+            writer.write("Output: {}\n\n".format(' '.join([info.index2words[index] for index in output[i]])))
