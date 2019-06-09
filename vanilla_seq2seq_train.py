@@ -82,6 +82,7 @@ for epoch in range(1, epochs + 1):
 
     learning_rate.append(average_epoch_error / batcher.total_train_batches)
 
+    print()
     average_valid_error = 0.0
     while batcher.hasnext('valid'):
         batch = batcher.nextbatch('valid')
@@ -97,7 +98,9 @@ for epoch in range(1, epochs + 1):
         error = model.evaluate_batch(batchX, batchY)
         average_valid_error += error
 
-    print("average valid loss: {}".format(average_valid_error / float(batcher.total_valid_batches)))
+    average_valid_error /= float(batcher.total_valid_batches)
+
+    print("Average ValidLoss {} \t Average Perplexity {}".format(average_valid_error, round(math.exp(average_valid_error), 3)))
 
 plt.title("Learning Curve using cross entropy cost function")
 plt.xlabel("Number of Epochs")
@@ -105,7 +108,7 @@ plt.ylabel("Cost")
 plt.plot(range(0, len(learning_rate)), learning_rate)
 plt.savefig('./learning_rate.png')
 
-model.save('./vanilla_seq2seq.pt')
+model.save('./saved_models/vanilla_seq2seq_model.pt')
 
 average_valid_error = 0.0
 batch_count = 0
@@ -125,11 +128,12 @@ while batcher.hasnext('valid'):
     error = model.evaluate_batch(batchX, batchY)
     average_valid_error += error
 
-print("average valid loss: {}".format(average_valid_error / float(batcher.total_valid_batches)))
+average_valid_error /= float(batcher.total_valid_batches)
+print("Average ValidLoss {} \t Average Perplexity {}".format(average_valid_error, round(math.exp(average_valid_error), 3)))
 
 batch_count = 0
 
-with open('./output.txt', 'w') as writer:
+with open('./saved_models/vanilla_seq2seq_model_output.txt', 'w') as writer:
     while batcher.hasnext('test'):
         batch_count += 1
         batch = batcher.nextbatch('test')
