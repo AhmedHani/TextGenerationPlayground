@@ -62,4 +62,3 @@ class CustomizedTransformer(object):
 
         return sampled_output.cpu().data.numpy()
 
-

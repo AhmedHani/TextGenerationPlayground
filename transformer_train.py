@@ -10,11 +10,9 @@ from models.torch_transformer import CustomizedTransformer
 
 parser = argparse.ArgumentParser(description='Encoder-Decoder Text Generation')
 
-parser.add_argument('--batch_size', type=int, default=32, help='training batch size')
+parser.add_argument('--batch_size', type=int, default=16, help='training batch size')
 parser.add_argument('--epochs', type=int, default=20, help='number of training epochs')
-parser.add_argument('--embedding_dim', type=int, default=300, help='embedding dimension')
-parser.add_argument('--hidden_dim', type=int, default=512, help='hidden layer dimension')
-parser.add_argument('--n_layers', type=int, default=2, help='number of stacked rnn layers')
+parser.add_argument('--embedding_dim', type=int, default=128, help='embedding dimension')
 parser.add_argument('--no-cuda', action='store_true', default=False, help='disables CUDA training')
 
 args = parser.parse_args()
@@ -22,8 +20,6 @@ args = parser.parse_args()
 batch_size = args.batch_size
 epochs = args.epochs
 embedding_dim = args.embedding_dim
-hidden_dim = args.hidden_dim
-n_layers = args.n_layers
 device = 'cpu' if not args.no_cuda is False else 'cuda'
 
 gyfac = GYAFCEntertainmentFormal()
@@ -37,10 +33,7 @@ transformations = TextTransformations(
     TextTransformations.AddStartEndTokens()
 )
 
-words2index = info.words2index
 text_encoder = TextEncoder(vocab2indexes=info.words2index, modelname='word_index')
-
-index2words = info.index2words
 
 model = CustomizedTransformer(input_size=text_encoder.encoding_size(),
                               embedding_dim=embedding_dim,
